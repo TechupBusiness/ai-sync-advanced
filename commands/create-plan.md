@@ -5,11 +5,35 @@ description: Generate a development task plan
 
 # Project Plan Generation Prompt
 
-Create a development task plan in markdown format for the following project:
+## Execution Approach
+
+Perform an **extensive analysis** of this project before creating the plan. If your environment has specialist agents (e.g., architect, security, UX, performance), delegate analysis to them and synthesize their input.
+
+> **Tip**: If an orchestrator/coordinator agent exists, use it to delegate analysis across relevant specialists before consolidating findings into the plan.
+
+### Analysis Goals
+
+- **Stability**: Identify fragile areas, missing tests, error handling gaps
+- **Maintainability**: Find code smells, unclear architecture, missing documentation
+- **Currency**: Outdated dependencies, deprecated patterns, tech debt
+- **UI/UX Quality**: User experience issues, accessibility gaps, design inconsistencies (if applicable)
+
+### Context Files (Read First)
+
+- Project documentation (`docs/*.md`, `README.md`)
+- Existing plan if any (`.ai-flow/plan.md`)
+- Past learnings (`.ai-flow/learnings.md`)
+- Architecture docs (`.ai-flow/project.md`)
+
+---
+
+## Plan Parameters
+
+Fill in these values for your project:
 
 **Project Name:** [Your project name]
-**Project plan template:** [Path to the important template that you should use, `.ai-flow/template/plan-template.md`]
-**Project plan target document:** [Path to architecture doc, e.g., `.ai-flow/plan.md`]
+**Project plan template:** [Path to template if exists, e.g., `.ai-flow/template/plan-template.md`]
+**Project plan target document:** [Output path, e.g., `.ai-flow/plan.md`]
 **Architecture Document:** [Path to architecture doc, e.g., `.ai-flow/project.md`]
 **Tasks Directory:** [Path to task files, e.g., `.ai-flow/tasks/`]
 **Learnings Document:** [Path to learnings, e.g., `.ai-flow/learnings.md`]
@@ -27,11 +51,11 @@ Create a development task plan in markdown format for the following project:
 
 ## Format Requirements
 
-1. **Task ID Format:** Use `W{wave}-{track}-{counter}` format
-   - Wave number (W001, W002, W003...)
-   - Track letter (A, B, C, D...)
-   - Counter starting at 01 within each track per wave (01, 02, 03...)
-   - Example: W001-A-01, W001-A-02, W001-B-01, W002-A-01
+1. **Task ID Format:** Use `T{number}` format
+   - Sequential numbering: T001, T002, T003...
+   - Use 3+ digits for consistency (T001, not T1)
+   - Numbers should be globally unique across the project
+   - Example: T001, T002, T050, T100, T336
 
 2. **Priority Indicators:** Use colored emoji balls
    - 🟢 P0 (MVP/Critical)
@@ -52,17 +76,19 @@ Create a development task plan in markdown format for the following project:
 5. **Track Organization:**
    - Group related tasks into tracks (A, B, C, D...)
    - Each track should have a descriptive name
-   - Show track priority with emoji
+   - Show track priority with emoji in track header
 
 6. **Task Structure:**
-   - Task ID in bold
-   - Clear task title
+   - Task ID in bold: `**T001**`
+   - Clear task title after the ID
+   - Link to task spec if exists: `(📋 [Spec](tasks/T001-short-description.md))`
+   - Task spec filenames use format: `T{number}-short-description.md` (e.g., `T050-user-auth.md`)
    - Bullet points for implementation details
-   - Dependencies listed with `**Deps: W1-A-01**` format
+   - Dependencies listed with `**Deps: T001, T002**` format
 
 7. **Include Sections:**
    - Legend explaining symbols
-   - Completed Work Summary (table format)
+   - Completed Work Summary (table format with categories)
    - Remaining Work organized by Waves and Tracks
    - Future Feature Ideas (backlog)
    - Notes for development guidelines
@@ -72,42 +98,100 @@ Create a development task plan in markdown format for the following project:
 Replace all `{{PLACEHOLDER}}` values with actual content. Do not leave any placeholders in the final document.
 
 
-## Example Output:
+## Example Template:
 
-```
-# My Project - Development Tasks
+```markdown
+# {{Project Name}} - Development Tasks
+
+Based on the architecture defined in `.ai-flow/project.md`, this document tracks remaining tasks and summarizes completed work.
+Completed task details can be found in `.ai-flow/tasks/`.
+Lessons learned from these tasks can be found in `.ai-flow/learnings.md`.
+
+---
 
 ## Legend
+
 - **Priority**: 🟢 P0 (MVP), 🟠 P1 (Important), 🔴 P2 (Nice to have)
 - **Status**: `[ ]` Todo, `[~]` In Progress, `[x]` Done
+- **Wave**: Execution order (Wave 1 first, then Wave 2, etc.)
+- **Task ID Format**: `T{number}` (e.g., T001, T050)
+
+---
+
+## Completed Work Summary
+
+| Category | Tasks | Description |
+|----------|-------|-------------|
+| **Phase 1: Foundation** | T001-T006 | Repository setup, build tooling |
+| **Phase 2: Core Features** | T010-T025 | Main functionality |
+
+---
 
 ## Remaining Work - Execution Plan
 
 ### Wave 1: Foundation
 
+> Tasks with no dependencies that can start immediately.
+
 #### Track A: Core Features (🟢 P0)
 
-- [ ] **W001-A-01** - Implement user authentication
+- [ ] **T050** - Implement user authentication (📋 [Spec](tasks/T050-user-auth.md))
   - Add login/logout endpoints
   - JWT token generation
   - Session management
+  - **Deps**: None
 
-- [ ] **W001-A-02** - Add user profile management
+- [ ] **T051** - Add user profile management (📋 [Spec](tasks/T051-user-profile.md))
   - CRUD operations for profiles
   - Avatar upload support
+  - **Deps**: T050
 
 #### Track B: API Layer (🟠 P1)
 
-- [ ] **W001-B-01** - Create REST API structure
+- [ ] **T060** - Create REST API structure (📋 [Spec](tasks/T060-rest-api.md))
   - Define route handlers
   - Add request validation
+  - **Deps**: None
 
-### Wave 2: Depends on Wave 1
+---
 
-#### Track A: Core Features (continued)
+### Wave 2: Integration (Depends on Wave 1)
 
-- [ ] **W002-A-01** - Add role-based permissions
+> Tasks that depend on Wave 1 completion.
+
+#### Track A: Security (🟢 P0)
+
+- [ ] **T100** - Add role-based permissions (📋 [Spec](tasks/T100-rbac.md))
   - Define permission levels
   - Middleware for access control
-  - **Deps: W001-A-01**
+  - **Deps: T050, T060**
+
+#### Track B: Testing (🟠 P1)
+
+- [ ] **T110** - Integration test suite (📋 [Spec](tasks/T110-integration-tests.md))
+  - API endpoint tests
+  - Authentication flow tests
+  - **Deps: T050, T060**
+
+---
+
+## Future Feature Ideas (Backlog)
+
+### Advanced Features (🔴 P2)
+
+- [ ] **T200** - Web dashboard
+  - Admin interface
+  - Analytics visualization
+
+- [ ] **T201** - Plugin system
+  - Extension API
+  - Marketplace integration
+
+---
+
+## Notes
+
+1. Breaking changes are acceptable during pre-release
+2. Test coverage target: >80% for new features
+3. Each task should have graceful error handling
 ```
